@@ -23,7 +23,6 @@ contract Escrow {
     struct EscrowDetail {
         EscrowStatus status;
         bytes32 title;
-        bytes32 shortInfo;
         address tokenAddress;
         uint256 deadline;
         address payable buyer;
@@ -34,13 +33,9 @@ contract Escrow {
     }
 
     EscrowDetail escrowDetail;
-
     address payable public addressToPayFee;
-
     uint256 rejectCount = 0;
-
     address public tokenAddress;
-
     mapping(address => bool) public areTrustedHandlers;
 
     constructor(
@@ -49,7 +44,6 @@ contract Escrow {
         uint256 _duration,
         uint256 amount,
         bytes32 title,
-        bytes32 shortInfo,
         address payable buyer,
         address payable seller,
         uint8 _feePercent,
@@ -66,7 +60,6 @@ contract Escrow {
         escrowDetail = EscrowDetail(
             EscrowStatus.Launched,
             title,
-            shortInfo,
             _tokenAddress,
             duration.add(block.timestamp),
             buyer,
@@ -96,9 +89,7 @@ contract Escrow {
         }
     }
 
-    function sendAndStatusUpdate(address payable toFund, EscrowStatus status)
-        private
-    {
+    function sendAndStatusUpdate(address payable toFund, EscrowStatus status) private {
         uint256 fee = escrowDetail.amount.mul(feePercent).div(100); // %1
         if (tokenAddress == address(0)) {
             addressToPayFee.transfer(fee); // %1
@@ -113,37 +104,22 @@ contract Escrow {
 
     function sellerLaunchedApprove() public payable onlySeller {
         require(getBalance() > 0, '___NO_FUNDS___');
-        require(
-            escrowDetail.status == EscrowStatus.Launched,
-            '___NOT_IN_LAUNCHED_STATUS___'
-        );
+        require(escrowDetail.status == EscrowStatus.Launched, '___NOT_IN_LAUNCHED_STATUS___');
         escrowDetail.status = EscrowStatus.Ongoing;
     }
 
     function sellerDeliver() external onlySeller {
-        require(
-            escrowDetail.status == EscrowStatus.Ongoing,
-            '___NOT_IN_ONGOING_STATUS___'
-        );
+        require(escrowDetail.status == EscrowStatus.Ongoing, '___NOT_IN_ONGOING_STATUS___');
         escrowDetail.status = EscrowStatus.Delivered;
     }
 
     function buyerConfirmDelivery() external payable onlyBuyer {
-        require(
-            escrowDetail.status == EscrowStatus.Delivered,
-            '___NOT_IN_DELIVERED_STATUS___'
-        );
+        require(escrowDetail.status == EscrowStatus.Delivered, '___NOT_IN_DELIVERED_STATUS___');
         sendAndStatusUpdate(escrowDetail.seller, EscrowStatus.Complete);
     }
 
-    function buyerDeliverReject(uint256 _deliverRejectDuration)
-        external
-        onlyBuyer
-    {
-        require(
-            escrowDetail.status == EscrowStatus.Delivered,
-            '___NOT_IN_DELIVERED_STATUS___'
-        );
+    function buyerDeliverReject(uint256 _deliverRejectDuration) external onlyBuyer {
+        require(escrowDetail.status == EscrowStatus.Delivered, '___NOT_IN_DELIVERED_STATUS___');
         require(_deliverRejectDuration >= 86400, '___REJECT_MIN_DAY___'); //1 day min
         rejectCount++;
         EscrowStatus state = EscrowStatus.RequestRevised;
@@ -153,25 +129,17 @@ contract Escrow {
         } else {
             escrowDetail.status = state;
             deliverRejectDuration = _deliverRejectDuration;
-            escrowDetail.requestRevisedDeadline = deliverRejectDuration.add(
-                block.timestamp
-            );
+            escrowDetail.requestRevisedDeadline = deliverRejectDuration.add(block.timestamp);
         }
     }
 
     function sellerRejectDeliverReject() external onlySeller {
-        require(
-            escrowDetail.status == EscrowStatus.RequestRevised,
-            '___NOT_IN_REJECT_DELIVERY_STATUS___'
-        );
+        require(escrowDetail.status == EscrowStatus.RequestRevised, '___NOT_IN_REJECT_DELIVERY_STATUS___');
         escrowDetail.status = EscrowStatus.Dispute;
     }
 
     function sellerApproveDeliverReject() external onlySeller {
-        require(
-            escrowDetail.status == EscrowStatus.RequestRevised,
-            '___NOT_IN_REJECT_DELIVERY_STATUS___'
-        );
+        require(escrowDetail.status == EscrowStatus.RequestRevised, '___NOT_IN_REJECT_DELIVERY_STATUS___');
         require(escrowDetail.deadline >= block.timestamp, '___EXPIRED___');
         escrowDetail.status = EscrowStatus.Ongoing;
         escrowDetail.deadline = escrowDetail.requestRevisedDeadline;
@@ -179,40 +147,22 @@ contract Escrow {
 
     function cancel() external {
         require(uint8(escrowDetail.status) < 4, '___NOT_ELIGIBLE___');
-        require(
-            msg.sender == escrowDetail.buyer ||
-                msg.sender == escrowDetail.seller,
-            '___INVALID_BUYER_SELLER___'
-        );
+        require(msg.sender == escrowDetail.buyer || msg.sender == escrowDetail.seller, '___INVALID_BUYER_SELLER___');
 
         if (
             msg.sender == escrowDetail.buyer &&
-            (escrowDetail.status == EscrowStatus.Ongoing ||
-                escrowDetail.status == EscrowStatus.RequestRevised ||
-                escrowDetail.status == EscrowStatus.Delivered)
+            (escrowDetail.status == EscrowStatus.Ongoing || escrowDetail.status == EscrowStatus.RequestRevised || escrowDetail.status == EscrowStatus.Delivered)
         ) {
-            require(
-                escrowDetail.deadline <= block.timestamp,
-                '___NOT_EXPIRED___'
-            );
+            require(escrowDetail.deadline <= block.timestamp, '___NOT_EXPIRED___');
         }
 
         sendAndStatusUpdate(escrowDetail.buyer, EscrowStatus.Cancelled);
     }
 
     function fund(address payable toFund) external trusted {
-        require(
-            toFund == escrowDetail.buyer || toFund == escrowDetail.seller,
-            '___INVALID_BUYER_SELLER___'
-        );
-        require(
-            EscrowStatus.Cancelled != escrowDetail.status,
-            '___ALREADY_CANCELLED___'
-        );
-        require(
-            escrowDetail.status != EscrowStatus.Complete,
-            '___NOT_IN_COMPLETE_STATUS___'
-        );
+        require(toFund == escrowDetail.buyer || toFund == escrowDetail.seller, '___INVALID_BUYER_SELLER___');
+        require(EscrowStatus.Cancelled != escrowDetail.status, '___ALREADY_CANCELLED___');
+        require(escrowDetail.status != EscrowStatus.Complete, '___NOT_IN_COMPLETE_STATUS___');
         sendAndStatusUpdate(toFund, EscrowStatus.Complete);
     }
 
