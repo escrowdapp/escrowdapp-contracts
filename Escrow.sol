@@ -1,20 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import './SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 contract Escrow {
-    using SafeMath for uint256;
-    uint256 duration = 915151608; //29 years default
-    uint8 feePercent = 1; //default 1
-    uint256 deliverRejectDuration = 86400;
-
     enum EscrowStatus {
         Launched,
         Ongoing,
-        Delivered,
         RequestRevised,
+        Delivered,
         Dispute,
         Cancelled,
         Complete
@@ -30,6 +24,7 @@ contract Escrow {
         uint256 requestRevisedDeadline;
         uint256 amount;
         address escrowAddress;
+        uint8 feePercent;
     }
 
     EscrowDetail escrowDetail;
@@ -49,32 +44,39 @@ contract Escrow {
         uint8 _feePercent,
         address[] memory _handlers
     ) {
-        if (_duration > 0) {
+        require(_duration == 0 || _duration >= 86400, '___INVALID_DURATION___'); // SHOULD BE MIN 1 DAY
+        require(_feePercent > 0 || _feePercent < 100, '___INVALID_FEE_PERCENT___');
+        uint256 duration = 915151608; //29 years default
+        if (_duration >= 0) {
             duration = _duration;
         }
         addressToPayFee = _addressToPayFee;
         tokenAddress = _tokenAddress;
-        feePercent = _feePercent;
         areTrustedHandlers[msg.sender] = true;
         addTrustedHandlers(_handlers);
         escrowDetail = EscrowDetail(
             EscrowStatus.Launched,
             title,
             _tokenAddress,
-            duration.add(block.timestamp),
+            duration + block.timestamp,
             buyer,
             seller,
             0,
             amount,
-            address(this)
+            address(this),
+            _feePercent
         ); // solhint-disable-line not-rely-on-time
     }
 
     fallback() external payable {
-        escrowDetail.amount = msg.value;
+        require(uint8(escrowDetail.status) < 5, '___NOT_ELIGIBLE___');
+        require(msg.value > 0, '___INVALID_AMOUNT___');
     }
 
-    receive() external payable {}
+    receive() external payable {
+        require(uint8(escrowDetail.status) < 5, '___NOT_ELIGIBLE___');
+        require(msg.value > 0, '___INVALID_AMOUNT___');
+    }
 
     function getBalance() public view returns (uint256) {
         if (tokenAddress == address(0)) {
@@ -90,7 +92,7 @@ contract Escrow {
     }
 
     function sendAndStatusUpdate(address payable toFund, EscrowStatus status) private {
-        uint256 fee = escrowDetail.amount.mul(feePercent).div(100); // %1
+        uint256 fee = (escrowDetail.amount * escrowDetail.feePercent) / 100; // %1
         if (tokenAddress == address(0)) {
             addressToPayFee.transfer(fee); // %1
             toFund.transfer(escrowDetail.amount - fee);
@@ -102,7 +104,7 @@ contract Escrow {
         escrowDetail.status = status;
     }
 
-    function sellerLaunchedApprove() public payable onlySeller {
+    function sellerLaunchedApprove() public onlySeller {
         require(getBalance() > 0, '___NO_FUNDS___');
         require(escrowDetail.status == EscrowStatus.Launched, '___NOT_IN_LAUNCHED_STATUS___');
         escrowDetail.status = EscrowStatus.Ongoing;
@@ -113,7 +115,7 @@ contract Escrow {
         escrowDetail.status = EscrowStatus.Delivered;
     }
 
-    function buyerConfirmDelivery() external payable onlyBuyer {
+    function buyerConfirmDelivery() external onlyBuyer {
         require(escrowDetail.status == EscrowStatus.Delivered, '___NOT_IN_DELIVERED_STATUS___');
         sendAndStatusUpdate(escrowDetail.seller, EscrowStatus.Complete);
     }
@@ -128,8 +130,7 @@ contract Escrow {
             escrowDetail.status = state;
         } else {
             escrowDetail.status = state;
-            deliverRejectDuration = _deliverRejectDuration;
-            escrowDetail.requestRevisedDeadline = deliverRejectDuration.add(block.timestamp);
+            escrowDetail.requestRevisedDeadline = _deliverRejectDuration + block.timestamp;
         }
     }
 
@@ -140,20 +141,19 @@ contract Escrow {
 
     function sellerApproveDeliverReject() external onlySeller {
         require(escrowDetail.status == EscrowStatus.RequestRevised, '___NOT_IN_REJECT_DELIVERY_STATUS___');
-        require(escrowDetail.deadline >= block.timestamp, '___EXPIRED___');
         escrowDetail.status = EscrowStatus.Ongoing;
         escrowDetail.deadline = escrowDetail.requestRevisedDeadline;
     }
 
     function cancel() external {
-        require(uint8(escrowDetail.status) < 4, '___NOT_ELIGIBLE___');
+        require(uint8(escrowDetail.status) < 3, '___NOT_ELIGIBLE___');
         require(msg.sender == escrowDetail.buyer || msg.sender == escrowDetail.seller, '___INVALID_BUYER_SELLER___');
 
         if (
             msg.sender == escrowDetail.buyer &&
-            (escrowDetail.status == EscrowStatus.Ongoing || escrowDetail.status == EscrowStatus.RequestRevised || escrowDetail.status == EscrowStatus.Delivered)
+            (escrowDetail.status == EscrowStatus.Ongoing || escrowDetail.status == EscrowStatus.RequestRevised)
         ) {
-            require(escrowDetail.deadline <= block.timestamp, '___NOT_EXPIRED___');
+            require(escrowDetail.deadline <= block.timestamp && block.timestamp >= escrowDetail.requestRevisedDeadline, '___NOT_EXPIRED___');
         }
 
         sendAndStatusUpdate(escrowDetail.buyer, EscrowStatus.Cancelled);

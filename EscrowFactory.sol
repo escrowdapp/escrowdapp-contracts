@@ -29,11 +29,12 @@ contract EscrowFactory {
         address tokenAddress,
         uint256 amount,
         bytes32 title,
-        uint256 _standartDuration
+        uint256 _duration
     ) external payable returns (address) {
         require(msg.sender != seller, '___INVALID_SAME___');
         require(seller != address(0), '___NON_EXIST_ADDRESS___');
         require(areTokenTrusted[tokenAddress], '___NOT_TRUSTED___');
+        require(_duration == 0 || _duration >= 86400, '___INVALID_DURATION___'); // ONE_DAY_AS_SECONDS
 
         IERC20 token = IERC20(tokenAddress);
 
@@ -46,13 +47,13 @@ contract EscrowFactory {
         Escrow escrow = new Escrow(
             payable(feeAddress),
             tokenAddress,
-            _standartDuration,
+            _duration,
             amount,
             title,
             payable(msg.sender),
             seller,
             feePercent,
-            getTrustedHandlers()
+            getProcessedHandlers(true)
         );
 
         if (tokenAddress == address(0)) {
@@ -68,19 +69,19 @@ contract EscrowFactory {
         return address(escrow);
     }
 
-    function getTrustedHandlers() public view returns (address[] memory) {
-        address[] memory trustedHandlers = new address[](processedTrustedHandlers.length);
+    function getProcessedHandlers(bool _trusted) public view returns (address[] memory) {
+        address[] memory processedHandlers = new address[](processedTrustedHandlers.length);
         uint j = 0;
         for (uint i = 0; i < processedTrustedHandlers.length; i++) {
-            if (areTrustedHandlers[processedTrustedHandlers[i]]) {
-                trustedHandlers[j] = processedTrustedHandlers[i];
+            if (areTrustedHandlers[processedTrustedHandlers[i]] == _trusted) {
+                processedHandlers[j] = processedTrustedHandlers[i];
                 j++;
             }
         }
-        return trustedHandlers;
+        return processedHandlers;
     }
 
-    function withdraw(address payable to, address tokenAddress, uint256 amount) external payable trusted {   
+    function withdraw(address payable to, address tokenAddress, uint256 amount) external trusted {   
         if (tokenAddress == address(0)) {
             to.transfer(amount);
         } else {
@@ -90,8 +91,8 @@ contract EscrowFactory {
 
     function switchActiveTrustedHandlers(address[] memory _handlers, bool approve) public trusted {
         for (uint256 i = 0; i < _handlers.length; i++) {
-            processedTrustedHandlers.push(_handlers[i]);
             areTrustedHandlers[_handlers[i]] = approve;
+            processedTrustedHandlers.push(_handlers[i]);
         }
     }
 
@@ -122,8 +123,12 @@ contract EscrowFactory {
         feeAddress = _feeAddress;
     }
 
-    fallback() external payable {}
-    receive() external payable {}
+    fallback() external payable {
+        require(msg.value > 0, '___INVALID_AMOUNT___');
+    }
+    receive() external payable {
+        require(msg.value > 0, '___INVALID_AMOUNT___');
+    }
 
     function balanceOf(address tokenAddress) public view returns (uint256) {
         if (tokenAddress == address(0)) {
