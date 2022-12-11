@@ -12,7 +12,7 @@ Bitcoin: bc1q8v5xkmy2ws24upg37k3tu40lmlkfeqlf7wxumj
 
 BNB: bnb1ufa07c4sf6335up6sncae25ffnen32f4s0k6lr
 
-ERC/BEP20: 0x75ae995E25F5748Ebc264BD7a4DC77B988A22d48
+AVAX, TOMO, ERC/BEP20: 0x7DD98Aaf4B979a0F265ACF1487fA9d0A85E9681a
 
 # escrowdapp-contracts
 
