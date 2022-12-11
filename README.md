@@ -24,10 +24,10 @@ On-Chain Contracts: https://tinyurl.com/escrowdapp-contracts
 
 Web: www.escrowdapp.com
 
-App: app.escrowdap.com
+App: https://app.escrowdap.com
 
-Telegram: t.me/escrowdapp_com
+Telegram: https://t.me/escrowdapp_com
 
-Twitter: twitter.com/escrowdapp_com
+Twitter: https://twitter.com/escrowdapp_com
 
-Medium: medium.com/@escrowdapp_com
+Medium: https://medium.com/@escrowdapp_com
