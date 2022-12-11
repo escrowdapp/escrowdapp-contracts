@@ -2,7 +2,7 @@
 
 This is an open source escrow dapp acts as a neutral third party between buyer and seller to protect both parties from potential fraudulent actions of the other.
 
-We work up for this dapp to protect everyone from potential scams. This project has been built for web3 users. We only get 1% fixed fee from processes. 
+We work up for this dapp to protect everyone from potential scams. This project has been built for web3 users. We only get 1% fixed fee from processes. We do not aim to earn millions of dollars, but to make our application useful to web3 users.
 
 Feel free to ask any update, report bug and donate us to get bigger!
 
