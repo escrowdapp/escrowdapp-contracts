@@ -8,9 +8,11 @@ Feel free to ask any update, report bug and donate us to get bigger!
 
 Donation Addresses:
 
-ERC/BEP20: 0x75ae995E25F5748Ebc264BD7a4DC77B988A22d48
-
 Bitcoin: bc1q8v5xkmy2ws24upg37k3tu40lmlkfeqlf7wxumj
+
+BNB: bnb1ufa07c4sf6335up6sncae25ffnen32f4s0k6lr
+
+ERC/BEP20: 0x75ae995E25F5748Ebc264BD7a4DC77B988A22d48
 
 # escrowdapp-contracts
 
