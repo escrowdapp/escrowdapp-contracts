@@ -20,4 +20,14 @@ Audit: https://tinyurl.com/EscrowDappAudit
 
 On-Chain Contracts: https://tinyurl.com/escrowdapp-contracts
 
-Whitepaper: https://tinyurl.com/escrow-dapp-wp
+# project links
+
+Web: www.escrowdapp.com
+
+App: app.escrowdap.com
+
+Telegram: t.me/escrowdapp_com
+
+Twitter: twitter.com/escrowdapp_com
+
+Medium: medium.com/@escrowdapp_com
