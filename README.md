@@ -16,8 +16,8 @@ ERC/BEP20: 0x75ae995E25F5748Ebc264BD7a4DC77B988A22d48
 
 # escrowdapp-contracts
 
-Codes: https://github.com/escrowdapp/escrowdapp-contracts
-
 Audit: https://tinyurl.com/EscrowDappAudit
 
 On-Chain Contracts: https://tinyurl.com/escrowdapp-contracts
+
+Whitepaper: https://tinyurl.com/escrow-dapp-wp
