@@ -8,9 +8,7 @@ Feel free to ask any update, report bug and donate us to get bigger!
 
 Donation Addresses:
 
-ERC20: 0x75ae995E25F5748Ebc264BD7a4DC77B988A22d48
-
-BEP20: 0x75ae995E25F5748Ebc264BD7a4DC77B988A22d48
+ERC/BEP20: 0x75ae995E25F5748Ebc264BD7a4DC77B988A22d48
 
 Bitcoin: bc1q8v5xkmy2ws24upg37k3tu40lmlkfeqlf7wxumj
 
