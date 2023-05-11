@@ -18,7 +18,7 @@ AVAX, TOMO, ERC/BEP20: 0x7DD98Aaf4B979a0F265ACF1487fA9d0A85E9681a
 
 Audit: https://tinyurl.com/EscrowDappAudit
 
-On-Chain Contracts: https://tinyurl.com/escrowdapp-contracts
+On-Chain Contracts: https://www.escrowdapp.com/docs/
 
 # project links
 
