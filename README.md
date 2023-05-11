@@ -1,6 +1,6 @@
 # about
 
-This is an open source escrow dapp acts as a neutral third party between buyer and seller to protect both parties from potential fraudulent actions of the other.
+This is an open source web3 tool that acts as a neutral third party between buyer and seller to protect both parties from potential fraudulent actions of the other by using smart contract on blockchain.
 
 We only get 1% fixed fee from processes. All gains will go for future product developments and marketing. We built this dapp for crypto advocates, for the public; not to make millions of dollars!
 
