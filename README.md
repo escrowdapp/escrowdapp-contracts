@@ -8,11 +8,11 @@ Feel free to ask any update, report bug and donate us to get bigger!
 
 Donation Addresses:
 
-Bitcoin: bc1q8v5xkmy2ws24upg37k3tu40lmlkfeqlf7wxumj
+Bitcoin: 
+bc1q8v5xkmy2ws24upg37k3tu40lmlkfeqlf7wxumj
 
-BNB: bnb1ufa07c4sf6335up6sncae25ffnen32f4s0k6lr
-
-AVAX, VIC, ERC/BEP20: 0x7DD98Aaf4B979a0F265ACF1487fA9d0A85E9681a
+EVM: 
+0x7DD98Aaf4B979a0F265ACF1487fA9d0A85E9681a
 
 # escrowdapp-contracts
 
